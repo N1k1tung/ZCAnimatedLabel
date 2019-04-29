@@ -363,6 +363,9 @@
 
 - (void) drawRect:(CGRect)rect
 {
+    if (self.useDefaultDrawing && !self.layoutTool.textBlocks) {
+        return;
+    }
     [super drawRect:rect];
     
     if (self.layerBased) {
