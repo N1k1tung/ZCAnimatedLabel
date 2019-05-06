@@ -140,6 +140,8 @@
     NSMutableArray *textAttributes = [NSMutableArray arrayWithCapacity:3];
 
     CGFloat startOffsetY = 0;
+    
+    CGFloat startOffsetX = lineCount > 1 ? (size.width - s.width)/2 : 0;
 
     // Loop throught the lines
     for(CFIndex i = 0; i < lineCount; ++i) {
@@ -149,6 +151,7 @@
         CFRange lineRange = CTLineGetStringRange(line);
 
         CGPoint lineOrigin = lineOrigins[i];
+        lineOrigin.x += startOffsetX;
         CGFloat ascent, descent, leading;
         CGFloat lineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
         
@@ -207,7 +210,7 @@
                 realHeight = lineHeight;
                 originDiff = 0;
             }
-            textBlock.charRect = CGRectMake(startOffset + lineOrigins[i].x, startOffsetY + originDiff, endOffset - startOffset, realHeight);
+            textBlock.charRect = CGRectMake(startOffset + lineOrigin.x, startOffsetY + originDiff, endOffset - startOffset, realHeight);
             [textAttributes addObject:textBlock];
             
             if (self.layerBased) {                
