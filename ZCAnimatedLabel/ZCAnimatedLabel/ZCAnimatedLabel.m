@@ -363,9 +363,6 @@
 
 - (void) drawRect:(CGRect)rect
 {
-    if (self.useDefaultDrawing && !self.layoutTool.textBlocks) {
-        return;
-    }
     [super drawRect:rect];
     
     if (self.layerBased) {
@@ -411,6 +408,13 @@
 
     if (self.useDefaultDrawing) {
         [self.layoutTool cleanLayout];
+        if (!self.animatingAppear)
+            return;
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextClearRect(context, self.bounds);
+        CGRect frame = self.bounds;
+        frame.size.height += 10; // default drawing offsets are slightly larger so add some extra space
+        [self.attributedString drawWithRect:frame options:NSStringDrawingUsesLineFragmentOrigin context:NULL];
     }
 }
 
