@@ -14,7 +14,6 @@
 
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) NSTimeInterval animationTime;
-@property (nonatomic, assign) BOOL useDefaultDrawing;
 @property (nonatomic, assign) NSTimeInterval animationDurationTotal;
 @property (nonatomic, assign) BOOL animatingAppear; //we are during appear stage or not
 @property (nonatomic, strong) ZCCoreTextLayout *layoutTool;

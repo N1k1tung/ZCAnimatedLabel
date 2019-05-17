@@ -88,6 +88,10 @@ typedef NS_ENUM(NSInteger, ZCAnimatedLabelAppearDirection)
 
 @property (nonatomic, assign) CGFloat preferredMaxLayoutWidth;
 
+/**
+ * useDefaultDrawing - display attributed string without animation
+ */
+@property (nonatomic, assign) BOOL useDefaultDrawing;
 
 - (void) sizeToFit;
 
