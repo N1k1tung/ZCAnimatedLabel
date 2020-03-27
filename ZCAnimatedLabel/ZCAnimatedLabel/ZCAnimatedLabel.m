@@ -18,6 +18,7 @@
 @property (nonatomic, assign) BOOL animatingAppear; //we are during appear stage or not
 @property (nonatomic, strong) ZCCoreTextLayout *layoutTool;
 @property (nonatomic, assign) NSTimeInterval animationStarTime;
+@property (nonatomic, strong) UIImage *imageContext;
 
 @end
 
@@ -246,7 +247,7 @@
 {
     _text = text;
     [self _layoutForChangedString];
-    [self setNeedsDisplay];    
+    [self setNeedsDisplay];
 }
 
 - (void) setTextColor:(UIColor *)textColor
@@ -322,7 +323,7 @@
 {
     CGFloat realProgress = [ZCEasingUtil bounceWithStiffness:0.01 numberOfBounces:1 time:textBlock.progress shake:NO shouldOvershoot:NO];
     if (textBlock.progress <= 0.0f) {
-        return; 
+        return;
     }
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);
@@ -367,6 +368,11 @@
     if (self.layerBased) {
         return;
     }
+    
+    // create snapshot image buffer
+    if (!self.useDefaultDrawing) {
+        UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, UIScreen.mainScreen.scale);
+    }
 
     if (self.debugRedraw) {
         CGContextRef context = UIGraphicsGetCurrentContext();
@@ -375,7 +381,7 @@
         CGFloat brightness = ( arc4random() % 128 / 256.0 ) + 0.5;
         UIColor *color = [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
         CGContextSetFillColorWithColor(context, color.CGColor);
-        CGContextFillRect(context, rect);        
+        CGContextFillRect(context, rect);
     }
     
     for (ZCTextBlock *textBlock in self.layoutTool.textBlocks) {
@@ -393,7 +399,7 @@
         if (self.useDefaultDrawing) {
             if (self.animatingAppear) {
                 [textBlock.derivedAttributedString drawInRect:textBlock.charRect];
-            }            
+            }
         }
         else {
             if (self.animatingAppear) {
@@ -405,15 +411,30 @@
         }
     }
 
+    // finalize snapshot
+    if (!self.useDefaultDrawing) {
+        self.imageContext = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+    }
+    
     if (self.useDefaultDrawing) {
         [self.layoutTool cleanLayout];
         if (!self.animatingAppear)
             return;
-        CGContextRef context = UIGraphicsGetCurrentContext();
-        CGContextClearRect(context, self.bounds);
-        CGRect frame = self.bounds;
-        frame.size.height += 10; // default drawing offsets are slightly larger so add some extra space
-        [self.attributedString drawWithRect:frame options:NSStringDrawingUsesLineFragmentOrigin context:NULL];
+        
+        // no image context was saved - just draw attributed string
+        if (!self.imageContext) {
+            CGContextRef context = UIGraphicsGetCurrentContext();
+            CGContextClearRect(context, self.bounds);
+            CGRect frame = self.bounds;
+            
+            frame.size.height += 10; // default drawing offsets are slightly larger so add some extra space
+            [self.attributedString drawWithRect:frame options:NSStringDrawingUsesLineFragmentOrigin context:NULL];
+        }
+    }
+    
+    if (self.imageContext) {
+        [self.imageContext drawInRect:self.bounds];
     }
 }
 
